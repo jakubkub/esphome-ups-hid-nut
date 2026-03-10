@@ -238,6 +238,7 @@ namespace sensitivity {
 // ==================== Protocol Names ====================
 namespace protocol {
     static constexpr const char* APC_HID = "APC HID";
+    static constexpr const char* APC_CS500_HID = "APC CS500 HID";
     static constexpr const char* CYBERPOWER = "CyberPower";
     static constexpr const char* GENERIC = "Generic";
     static constexpr const char* NONE = "None";

@@ -22,6 +22,7 @@ struct DeviceInfo {
   enum DetectedProtocol {
     PROTOCOL_UNKNOWN = 0,
     PROTOCOL_APC_HID,
+    PROTOCOL_APC_CS500_HID,
     PROTOCOL_CYBERPOWER_HID,
     PROTOCOL_GENERIC_HID
   };
@@ -58,6 +59,7 @@ struct DeviceInfo {
   std::string get_protocol_name() const {
     switch (detected_protocol) {
       case PROTOCOL_APC_HID: return "APC HID";
+      case PROTOCOL_APC_HID: return "APC CS500 HID";
       case PROTOCOL_CYBERPOWER_HID: return "CyberPower HID";
       case PROTOCOL_GENERIC_HID: return "Generic HID";
       default: return "Unknown";
