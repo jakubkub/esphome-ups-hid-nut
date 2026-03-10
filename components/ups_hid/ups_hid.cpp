@@ -7,6 +7,7 @@
 #endif
 #include "protocol_factory.h"
 #include "protocol_apc.h"
+#include "protocol_apc_cs500.h"
 #include "protocol_cyberpower.h"
  
 #include "protocol_generic.h"
