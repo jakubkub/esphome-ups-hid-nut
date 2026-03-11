@@ -193,6 +193,10 @@ ProtocolFactory::create_by_name(const std::string& protocol_name, UpsHidComponen
     for (const auto& vendor_pair : vendor_registry) {
         for (const auto& info : vendor_pair.second) {
             // Match protocol name (case-insensitive)
+            
+            ESP_LOGD(FACTORY_TAG, "Info by name: %s", info.name.c_str());
+            ESP_LOGD(FACTORY_TAG, "Protocol by name: %s", protocol_name.c_str());
+
             std::string info_name_lower = info.name;
             std::string protocol_name_lower = protocol_name;
             std::transform(info_name_lower.begin(), info_name_lower.end(), info_name_lower.begin(), ::tolower);
