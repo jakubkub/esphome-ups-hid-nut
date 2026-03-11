@@ -6,7 +6,7 @@ namespace esphome {
 namespace ups_hid {
 
 // APC HID Protocol implementation for modern APC UPS devices
-class ApcHidProtocol : public UpsProtocolBase {
+class ApcCS500HidProtocol : public UpsProtocolBase {
 public:
   // Public struct for use by report parsers
   struct HidReport {
@@ -16,7 +16,7 @@ public:
     HidReport() : report_id(0) {}
   };
   
-  explicit ApcHidProtocol(UpsHidComponent *parent);
+  explicit ApcCS500HidProtocol(UpsHidComponent *parent);
   
   bool detect() override;
   bool initialize() override;

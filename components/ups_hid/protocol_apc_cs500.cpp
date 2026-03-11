@@ -101,9 +101,9 @@ static std::string convert_apc_date(uint32_t apc_date) {
 }
 
 // APC HID Protocol implementation
-ApcHidProtocol::ApcHidProtocol(UpsHidComponent *parent) : UpsProtocolBase(parent) {}
+ApcCS500HidProtocol::ApcCS500HidProtocol(UpsHidComponent *parent) : UpsProtocolBase(parent) {}
 
-bool ApcHidProtocol::detect() {
+bool ApcCS500HidProtocol::detect() {
   ESP_LOGD(APC_HID_TAG, "Detecting APC HID Protocol...");
   
   // Check device connection status first
@@ -149,7 +149,7 @@ bool ApcHidProtocol::detect() {
   return false;
 }
 
-bool ApcHidProtocol::initialize() {
+bool ApcCS500HidProtocol::initialize() {
   ESP_LOGD(APC_HID_TAG, "Initializing APC HID Protocol...");
   
   // Initialize HID communication
@@ -165,7 +165,7 @@ bool ApcHidProtocol::initialize() {
   return true;
 }
 
-bool ApcHidProtocol::read_data(UpsData &data) {
+bool ApcCS500HidProtocol::read_data(UpsData &data) {
   ESP_LOGV(APC_HID_TAG, "Reading APC HID UPS data...");
   
   bool success = false;
@@ -294,13 +294,13 @@ bool ApcHidProtocol::read_data(UpsData &data) {
   return success;
 }
 
-bool ApcHidProtocol::init_hid_communication() {
+bool ApcCS500HidProtocol::init_hid_communication() {
   // Set up HID communication parameters
   // For APC devices, we typically use standard HID interrupt transfers
   return true;
 }
 
-bool ApcHidProtocol::read_hid_report(uint8_t report_id, HidReport &report) {
+bool ApcCS500HidProtocol::read_hid_report(uint8_t report_id, HidReport &report) {
   // Check device connection before any HID communication
   if (!parent_->is_device_connected()) {
     ESP_LOGV(APC_HID_TAG, "Device not connected, skipping HID report 0x%02X", report_id);
@@ -354,7 +354,7 @@ bool ApcHidProtocol::read_hid_report(uint8_t report_id, HidReport &report) {
 #endif
 }
 
-void ApcHidProtocol::log_raw_data(const uint8_t* buffer, size_t buffer_len) {
+void ApcCS500HidProtocol::log_raw_data(const uint8_t* buffer, size_t buffer_len) {
   if (buffer_len > 0) {
     std::string hex_data;
     for (size_t i = 0; i < buffer_len; i++) {
@@ -371,7 +371,7 @@ void ApcHidProtocol::log_raw_data(const uint8_t* buffer, size_t buffer_len) {
   }
 }
 
-bool ApcHidProtocol::write_hid_report(const HidReport &report) {
+bool ApcCS500HidProtocol::write_hid_report(const HidReport &report) {
 #ifdef USE_ESP32
   // Use HID Feature Report for UPS control commands  
   const uint8_t report_type = HID_REPORT_TYPE_FEATURE; // Feature Report
@@ -402,7 +402,7 @@ bool ApcHidProtocol::write_hid_report(const HidReport &report) {
 
 namespace {
 
-using HidReport = ApcHidProtocol::HidReport;
+using HidReport = ApcCS500HidProtocol::HidReport;
 
 class ApcReportParser {
 public:
@@ -622,7 +622,7 @@ void ApcReportParser::parse_load_report(const HidReport &report, UpsData &data) 
 // APC Protocol Implementation - Now delegates to parser classes
 // ============================================================================
 
-void ApcHidProtocol::parse_status_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_status_report(const HidReport &report, UpsData &data) {
   ApcReportParser::parse_status_report(report, data);
 }
 
@@ -813,15 +813,15 @@ void ApcReportParser::parse_power_report(const HidReport &report, UpsData &data)
   }
 }
 
-void ApcHidProtocol::parse_battery_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_battery_report(const HidReport &report, UpsData &data) {
   ApcReportParser::parse_battery_report(report, data);
 }
 
-void ApcHidProtocol::parse_voltage_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_voltage_report(const HidReport &report, UpsData &data) {
   ApcReportParser::parse_voltage_report(report, data);
 }
 
-void ApcHidProtocol::parse_power_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_power_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 3) {
     ESP_LOGW(APC_HID_TAG, "Power report too short: %zu bytes", report.data.size());
     return;
@@ -859,7 +859,7 @@ void ApcHidProtocol::parse_power_report(const HidReport &report, UpsData &data) 
   }
 }
 
-void ApcHidProtocol::read_device_info() {
+void ApcCS500HidProtocol::read_device_info() {
   // Skip reading device info if not connected
   if (!parent_->is_connected()) {
     ESP_LOGD(APC_HID_TAG, "Skipping device info read - device not connected");
@@ -873,32 +873,32 @@ void ApcHidProtocol::read_device_info() {
   }
 }
 
-void ApcHidProtocol::parse_device_info_report(const HidReport &report) {
+void ApcCS500HidProtocol::parse_device_info_report(const HidReport &report) {
   ApcReportParser::parse_device_info_report(report);
 }
 
 // NUT-compatible parser implementations based on real device data analysis
-void ApcHidProtocol::parse_power_summary_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_power_summary_report(const HidReport &report, UpsData &data) {
   ApcReportParser::parse_power_summary_report(report, data);
 }
 
-void ApcHidProtocol::parse_present_status_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_present_status_report(const HidReport &report, UpsData &data) {
   ApcReportParser::parse_present_status_report(report, data);
 }
 
-void ApcHidProtocol::parse_apc_status_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_apc_status_report(const HidReport &report, UpsData &data) {
   ApcReportParser::parse_apc_status_report(report, data);
 }
 
-void ApcHidProtocol::parse_input_voltage_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_input_voltage_report(const HidReport &report, UpsData &data) {
   ApcReportParser::parse_input_voltage_report(report, data);
 }
 
-void ApcHidProtocol::parse_load_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_load_report(const HidReport &report, UpsData &data) {
   ApcReportParser::parse_load_report(report, data);
 }
 
-void ApcHidProtocol::read_device_information(UpsData &data) {
+void ApcCS500HidProtocol::read_device_information(UpsData &data) {
   ESP_LOGD(APC_HID_TAG, "Reading APC device information...");
   
   // Try to read USB string descriptors first (most reliable for APC devices)
@@ -932,7 +932,7 @@ void ApcHidProtocol::read_device_information(UpsData &data) {
   ESP_LOGD(APC_HID_TAG, "Device information reading completed");
 }
 
-void ApcHidProtocol::parse_serial_number_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_serial_number_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 2) {
     ESP_LOGW(APC_HID_TAG, "Serial number report too short: %zu bytes", report.data.size());
     return;
@@ -964,7 +964,7 @@ void ApcHidProtocol::parse_serial_number_report(const HidReport &report, UpsData
   }
 }
 
-void ApcHidProtocol::parse_firmware_version_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_firmware_version_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 2) {
     ESP_LOGV(APC_HID_TAG, "Firmware version report too short: %zu bytes", report.data.size());
     return;
@@ -1093,7 +1093,7 @@ void ApcHidProtocol::parse_firmware_version_report(const HidReport &report, UpsD
   }
 }
 
-void ApcHidProtocol::parse_beeper_status_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_beeper_status_report(const HidReport &report, UpsData &data) {
   // Parse APC beeper status based on NUT UPS.PowerSummary.AudibleAlarmControl
   // NUT debug shows: ReportID: APC_REPORT_ID_AUDIBLE_ALARM, Value: 2 (AudibleAlarmControl)
   // APC beeper mapping: 1=disabled, 2=enabled, 3=muted
@@ -1168,7 +1168,7 @@ void ApcHidProtocol::parse_beeper_status_report(const HidReport &report, UpsData
   }
 }
 
-void ApcHidProtocol::parse_input_sensitivity_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_input_sensitivity_report(const HidReport &report, UpsData &data) {
   // Parse APC input sensitivity based on NUT UPS.Input.APCSensitivity
   // NUT debug shows: ReportID: APC_REPORT_ID_SENSITIVITY, Value: 1 (APCSensitivity)
   // APC sensitivity mapping: 0=high, 1=normal/medium, 2=low
@@ -1237,7 +1237,7 @@ void ApcHidProtocol::parse_input_sensitivity_report(const HidReport &report, Ups
   }
 }
 
-void ApcHidProtocol::read_missing_dynamic_values(UpsData &data) {
+void ApcCS500HidProtocol::read_missing_dynamic_values(UpsData &data) {
   ESP_LOGD(APC_HID_TAG, "Reading APC missing dynamic values from NUT analysis...");
   
   // 1. Battery voltage nominal (Report APC_REPORT_ID_BATTERY_VOLTAGE_NOMINAL)
@@ -1348,7 +1348,7 @@ void ApcHidProtocol::read_missing_dynamic_values(UpsData &data) {
   ESP_LOGD(APC_HID_TAG, "Completed reading APC missing dynamic values");
 }
 
-void ApcHidProtocol::parse_battery_voltage_nominal_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_battery_voltage_nominal_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 3) {
     ESP_LOGW(APC_HID_TAG, "Battery voltage nominal report too short: %zu bytes", report.data.size());
     return;
@@ -1364,7 +1364,7 @@ void ApcHidProtocol::parse_battery_voltage_nominal_report(const HidReport &repor
            data.battery.voltage_nominal, report.data[2], report.data[1], voltage_raw, voltage_raw);
 }
 
-void ApcHidProtocol::parse_battery_voltage_actual_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_battery_voltage_actual_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 3) {
     ESP_LOGW(APC_HID_TAG, "Battery voltage actual report too short: %zu bytes", report.data.size());
     return;
@@ -1400,7 +1400,7 @@ void ApcHidProtocol::parse_battery_voltage_actual_report(const HidReport &report
   }
 }
 
-void ApcHidProtocol::parse_input_voltage_nominal_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_input_voltage_nominal_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 3) {
     ESP_LOGW(APC_HID_TAG, "Input voltage nominal report too short: %zu bytes", report.data.size());
     return;
@@ -1415,7 +1415,7 @@ void ApcHidProtocol::parse_input_voltage_nominal_report(const HidReport &report,
            data.power.input_voltage_nominal, report.data[2], report.data[1], voltage_raw);
 }
 
-void ApcHidProtocol::parse_input_transfer_limits_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_input_transfer_limits_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 3) {
     ESP_LOGW(APC_HID_TAG, "Input transfer limits report too short: %zu bytes", report.data.size());
     return;
@@ -1437,7 +1437,7 @@ void ApcHidProtocol::parse_input_transfer_limits_report(const HidReport &report,
   }
 }
 
-void ApcHidProtocol::parse_battery_runtime_low_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_battery_runtime_low_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 3) {
     ESP_LOGW(APC_HID_TAG, "Battery runtime low report too short: %zu bytes", report.data.size());
     return;
@@ -1452,7 +1452,7 @@ void ApcHidProtocol::parse_battery_runtime_low_report(const HidReport &report, U
            data.battery.runtime_low, report.data[2], report.data[1], time_raw);
 }
 
-void ApcHidProtocol::parse_manufacture_date_report(const HidReport &report, UpsData &data, bool is_battery) {
+void ApcCS500HidProtocol::parse_manufacture_date_report(const HidReport &report, UpsData &data, bool is_battery) {
   if (report.data.size() < 3) {
     ESP_LOGW(APC_HID_TAG, "Manufacture date report too short: %zu bytes", report.data.size());
     return;
@@ -1477,7 +1477,7 @@ void ApcHidProtocol::parse_manufacture_date_report(const HidReport &report, UpsD
   }
 }
 
-void ApcHidProtocol::parse_ups_delay_shutdown_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_ups_delay_shutdown_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 3) {
     ESP_LOGW(APC_HID_TAG, "UPS delay shutdown report too short: %zu bytes", report.data.size());
     return;
@@ -1501,7 +1501,7 @@ void ApcHidProtocol::parse_ups_delay_shutdown_report(const HidReport &report, Up
   }
 }
 
-void ApcHidProtocol::parse_ups_delay_reboot_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_ups_delay_reboot_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 2) {
     ESP_LOGW(APC_HID_TAG, "UPS delay reboot report too short: %zu bytes", report.data.size());
     return;
@@ -1518,7 +1518,7 @@ void ApcHidProtocol::parse_ups_delay_reboot_report(const HidReport &report, UpsD
   ESP_LOGI(APC_HID_TAG, "APC UPS delay reboot: %d seconds", data.config.delay_reboot);
 }
 
-std::string ApcHidProtocol::convert_apc_date(uint16_t date_value) {
+std::string ApcCS500HidProtocol::convert_apc_date(uint16_t date_value) {
   ESP_LOGD(APC_HID_TAG, "Converting USB PDC date value: %u (0x%04X)", date_value, date_value);
   
   if (date_value == 0) {
@@ -1550,7 +1550,7 @@ std::string ApcHidProtocol::convert_apc_date(uint16_t date_value) {
   return std::string(date_str);
 }
 
-void ApcHidProtocol::parse_battery_charge_threshold_report(const HidReport &report, UpsData &data, bool is_low_threshold) {
+void ApcCS500HidProtocol::parse_battery_charge_threshold_report(const HidReport &report, UpsData &data, bool is_low_threshold) {
   if (report.data.size() < 2) {
     ESP_LOGW(APC_HID_TAG, "Battery charge threshold report too short: %zu bytes", report.data.size());
     return;
@@ -1572,7 +1572,7 @@ void ApcHidProtocol::parse_battery_charge_threshold_report(const HidReport &repo
   }
 }
 
-void ApcHidProtocol::parse_battery_chemistry_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_battery_chemistry_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 2) {
     ESP_LOGW(APC_HID_TAG, "Battery chemistry report too short: %zu bytes", report.data.size());
     return;
@@ -1592,7 +1592,7 @@ void ApcHidProtocol::parse_battery_chemistry_report(const HidReport &report, Ups
            data.battery.type.c_str(), chemistry_raw);
 }
 
-bool ApcHidProtocol::beeper_enable() {
+bool ApcCS500HidProtocol::beeper_enable() {
   ESP_LOGD(APC_HID_TAG, "Sending APC beeper enable command");
   
   // APC DEVICE SPECIFIC: From NUT debug, your device supports TWO beeper report IDs:
@@ -1629,7 +1629,7 @@ bool ApcHidProtocol::beeper_enable() {
   return false;
 }
 
-bool ApcHidProtocol::beeper_disable() {
+bool ApcCS500HidProtocol::beeper_disable() {
   ESP_LOGD(APC_HID_TAG, "Sending APC beeper disable command");
   
   // APC DEVICE SPECIFIC: From NUT debug, your device supports TWO beeper report IDs:
@@ -1656,7 +1656,7 @@ bool ApcHidProtocol::beeper_disable() {
   return false;
 }
 
-bool ApcHidProtocol::beeper_mute() {
+bool ApcCS500HidProtocol::beeper_mute() {
   ESP_LOGD(APC_HID_TAG, "Sending APC beeper mute command");
   
   // MUTE FUNCTIONALITY (Value 3):
@@ -1686,7 +1686,7 @@ bool ApcHidProtocol::beeper_mute() {
   return false;
 }
 
-bool ApcHidProtocol::beeper_test() {
+bool ApcCS500HidProtocol::beeper_test() {
   ESP_LOGD(APC_HID_TAG, "Starting APC beeper test sequence");
   
   // First, read current beeper status to restore later
@@ -1740,7 +1740,7 @@ bool ApcHidProtocol::beeper_test() {
 }
 
 // UPS and Battery Test implementations based on NUT analysis
-bool ApcHidProtocol::start_battery_test_quick() {
+bool ApcCS500HidProtocol::start_battery_test_quick() {
   ESP_LOGI(APC_HID_TAG, "Starting APC quick battery test");
   
   // Check if device supports SET_REPORT operations
@@ -1772,7 +1772,7 @@ bool ApcHidProtocol::start_battery_test_quick() {
   }
 }
 
-bool ApcHidProtocol::start_battery_test_deep() {
+bool ApcCS500HidProtocol::start_battery_test_deep() {
   ESP_LOGI(APC_HID_TAG, "Starting APC deep battery test");
   
   // APC Back-UPS ES 700G (PID=usb::PRODUCT_ID_APC_BACK_UPS_ES_700) is INPUT-ONLY and doesn't support HID SET_REPORT
@@ -1798,7 +1798,7 @@ bool ApcHidProtocol::start_battery_test_deep() {
   }
 }
 
-bool ApcHidProtocol::stop_battery_test() {
+bool ApcCS500HidProtocol::stop_battery_test() {
   ESP_LOGI(APC_HID_TAG, "Stopping APC battery test");
   
   // APC Back-UPS ES 700G (PID=usb::PRODUCT_ID_APC_BACK_UPS_ES_700) is INPUT-ONLY and doesn't support HID SET_REPORT
@@ -1824,7 +1824,7 @@ bool ApcHidProtocol::stop_battery_test() {
   }
 }
 
-bool ApcHidProtocol::start_ups_test() {
+bool ApcCS500HidProtocol::start_ups_test() {
   ESP_LOGI(APC_HID_TAG, "Starting APC UPS panel test");
   
   // Based on NUT debug logs, APC uses report ID APC_REPORT_ID_PANEL_TEST for panel test
@@ -1841,7 +1841,7 @@ bool ApcHidProtocol::start_ups_test() {
   }
 }
 
-bool ApcHidProtocol::stop_ups_test() {
+bool ApcCS500HidProtocol::stop_ups_test() {
   ESP_LOGI(APC_HID_TAG, "Stopping APC UPS panel test");
   
   // Based on NUT debug logs, APC uses report ID APC_REPORT_ID_PANEL_TEST for panel test
@@ -1858,7 +1858,7 @@ bool ApcHidProtocol::stop_ups_test() {
   }
 }
 
-void ApcHidProtocol::parse_test_result_report(const HidReport &report, UpsData &data) {
+void ApcCS500HidProtocol::parse_test_result_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 2) {
     ESP_LOGW(APC_HID_TAG, "Test result report too short: %zu bytes", report.data.size());
     data.test.ups_test_result = test::RESULT_ERROR_READING;
@@ -1903,7 +1903,7 @@ void ApcHidProtocol::parse_test_result_report(const HidReport &report, UpsData &
   ESP_LOGI(APC_HID_TAG, "APC Test result: %s (raw: %d)", data.test.ups_test_result.c_str(), test_result_value);
 }
 
-void ApcHidProtocol::read_frequency_data(UpsData &data) {
+void ApcCS500HidProtocol::read_frequency_data(UpsData &data) {
   // Initialize frequency to NaN
   data.power.frequency = NAN;
   
@@ -1935,7 +1935,7 @@ void ApcHidProtocol::read_frequency_data(UpsData &data) {
   ESP_LOGV(APC_HID_TAG, "Frequency data not available from any HID report");
 }
 
-float ApcHidProtocol::parse_frequency_from_report(const HidReport &report) {
+float ApcCS500HidProtocol::parse_frequency_from_report(const HidReport &report) {
   if (report.data.size() < 2) {
     ESP_LOGV(APC_HID_TAG, "Frequency report 0x%02X too short: %zu bytes", report.data[0], report.data.size());
     return NAN;
@@ -2069,7 +2069,7 @@ float ApcHidProtocol::parse_frequency_from_report(const HidReport &report) {
   return NAN;
 }
 
-void ApcHidProtocol::detect_nominal_power_rating(const std::string& model_name, UpsData &data) {
+void ApcCS500HidProtocol::detect_nominal_power_rating(const std::string& model_name, UpsData &data) {
   ESP_LOGD(APC_HID_TAG, "Detecting nominal power rating for model: \"%s\"", model_name.c_str());
   
   // APC Back-UPS ES Series Power Ratings (based on model identification)
@@ -2147,7 +2147,7 @@ void ApcHidProtocol::detect_nominal_power_rating(const std::string& model_name, 
   }
 }
 
-bool ApcHidProtocol::read_timer_data(UpsData &data) {
+bool ApcCS500HidProtocol::read_timer_data(UpsData &data) {
   ESP_LOGD(APC_HID_TAG, "Reading APC timer countdown data");
   
   HidReport delay_shutdown_report;
@@ -2229,7 +2229,7 @@ bool ApcHidProtocol::read_timer_data(UpsData &data) {
 }
 
 // Delay configuration methods
-bool ApcHidProtocol::set_shutdown_delay(int seconds) {
+bool ApcCS500HidProtocol::set_shutdown_delay(int seconds) {
   ESP_LOGI(APC_HID_TAG, "Setting shutdown delay to %d seconds", seconds);
   
   // Validate range (0-600 seconds = 0-10 minutes for APC)
@@ -2275,7 +2275,7 @@ bool ApcHidProtocol::set_shutdown_delay(int seconds) {
   }
 }
 
-bool ApcHidProtocol::set_start_delay(int seconds) {
+bool ApcCS500HidProtocol::set_start_delay(int seconds) {
   ESP_LOGI(APC_HID_TAG, "Setting start/reboot delay to %d seconds", seconds);
   
   // Validate range (0-600 seconds = 0-10 minutes for APC)
@@ -2314,7 +2314,7 @@ bool ApcHidProtocol::set_start_delay(int seconds) {
   }
 }
 
-bool ApcHidProtocol::set_reboot_delay(int seconds) {
+bool ApcCS500HidProtocol::set_reboot_delay(int seconds) {
   // For APC, reboot delay is the same as start delay (report 0x40)
   return set_start_delay(seconds);
 }
@@ -2330,7 +2330,7 @@ namespace ups_hid {
 
 // Creator function for APC protocol
 std::unique_ptr<UpsProtocolBase> create_apc_protocol(UpsHidComponent* parent) {
-    return std::make_unique<ApcHidProtocol>(parent);
+    return std::make_unique<ApcCS500HidProtocol>(parent);
 }
 
 } // namespace ups_hid
