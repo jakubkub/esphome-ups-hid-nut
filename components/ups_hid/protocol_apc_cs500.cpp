@@ -2329,7 +2329,7 @@ namespace esphome {
 namespace ups_hid {
 
 // Creator function for APC protocol
-std::unique_ptr<UpsProtocolBase> create_apc_protocol(UpsHidComponent* parent) {
+std::unique_ptr<UpsProtocolBase> create_apc_cs500_protocol(UpsHidComponent* parent) {
     return std::make_unique<ApcCS500HidProtocol>(parent);
 }
 
@@ -2337,4 +2337,4 @@ std::unique_ptr<UpsProtocolBase> create_apc_protocol(UpsHidComponent* parent) {
 } // namespace esphome
 
 // Register APC protocol for vendor ID 0x051D
-REGISTER_UPS_PROTOCOL_FOR_VENDOR(0x051D, apc_hid_protocol, esphome::ups_hid::create_apc_protocol, "APC HID Protocol", "APC Back-UPS and Smart-UPS HID protocol implementation with comprehensive sensor support", 100);
+//REGISTER_UPS_PROTOCOL_FOR_VENDOR(0x051D, apc_cs500_hid_protocol, esphome::ups_hid::create_apc_cs500_protocol, "APC CS500 HID Protocol", "APC Back-UPS CS 500 HID protocol implementation with comprehensive sensor support", 100);
