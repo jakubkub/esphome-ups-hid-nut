@@ -21,8 +21,8 @@ public:
   bool detect() override;
   bool initialize() override;
   bool read_data(UpsData &data) override;
-  DeviceInfo::DetectedProtocol get_protocol_type() const override { return DeviceInfo::PROTOCOL_APC_HID; }
-  std::string get_protocol_name() const override { return "APC HID Protocol"; }
+  DeviceInfo::DetectedProtocol get_protocol_type() const override { return DeviceInfo::PROTOCOL_APC_CS500_HID; }
+  std::string get_protocol_name() const override { return "APC CS500 HID Protocol"; }
   
   // Beeper control methods
   bool beeper_enable() override;

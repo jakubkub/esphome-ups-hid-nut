@@ -14,7 +14,7 @@
 namespace esphome {
 namespace ups_hid {
 
-static const char *const APC_HID_TAG = "ups_hid.apc_hid";
+static const char *const APC_HID_TAG = "ups_hid.apc_cs500_hid";
 
 // APC HID Usage Pages and Usage IDs (based on NUT project research)
 static const uint16_t APC_USAGE_PAGE_UPS = 0x84;
