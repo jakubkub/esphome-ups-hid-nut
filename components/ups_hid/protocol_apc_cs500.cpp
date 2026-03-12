@@ -35,12 +35,15 @@ static const uint8_t APC_REPORT_ID_AUDIBLE_ALARM = 0x18;  // Audible alarm contr
 static const uint8_t APC_REPORT_ID_SENSITIVITY = 0x35;    // Input sensitivity (APCSensitivity)
 
 // Power and status report IDs
-static const uint8_t APC_REPORT_ID_POWER_SUMMARY = 0x0C;   // PowerSummary.RemainingCapacity + RunTimeToEmpty
+//static const uint8_t APC_REPORT_ID_POWER_SUMMARY = 0x0C;   // PowerSummary.RemainingCapacity + RunTimeToEmpty
+static const uint8_t APC_REPORT_ID_REMAINING_CAPACITY = 0x0C;   // PowerSummary.RemainingCapacity (1 bytes)
+static const uint8_t APC_REPORT_ID_RUNTIME_TO_EMPTY = 0x0D;   // PowerSummary.RunTimeToEmpty (2 bytes)
+
 static const uint8_t APC_REPORT_ID_PRESENT_STATUS = 0x16;  // PowerSummary.PresentStatus bitmap
 static const uint8_t APC_REPORT_ID_INPUT_VOLTAGE = 0x31;   // UPS.Input.Voltage
 static const uint8_t APC_REPORT_ID_LOAD_PERCENT = 0x50;    // UPS.PowerConverter.PercentLoad  
 static const uint8_t APC_REPORT_ID_OUTPUT_VOLTAGE = 0x09;  // PowerSummary.Voltage (legacy)
-static const uint8_t APC_REPORT_ID_FREQUENCY = 0x0D;       // Frequency information
+static const uint8_t APC_REPORT_ID_FREQUENCY = 0x2A;       // UPS.Output.Frequency (2 bytes)
 
 // Extended configuration report IDs
 static const uint8_t APC_REPORT_ID_BATTERY_RUNTIME_LOW = 0x24; // Battery runtime low threshold
@@ -55,7 +58,7 @@ static const uint8_t APC_REPORT_ID_AUDIBLE_BEEPER = 0x78;  // Alternative beeper
 // Additional report IDs found in code
 // Note: Serial number report ID moved to shared constant usb::REPORT_ID_SERIAL_NUMBER
 static const uint8_t APC_REPORT_ID_MFR_DATE_UPS = 0x07;    // UPS manufacture date
-static const uint8_t APC_REPORT_ID_MFR_DATE_BATTERY = 0x20; // Battery manufacture date  
+static const uint8_t APC_REPORT_ID_MFR_DATE_BATTERY = 0x15; // Battery manufacture date  
 // Note: Battery chemistry report ID moved to shared constant battery_chemistry::REPORT_ID
 static const uint8_t APC_REPORT_ID_CHARGE_WARNING = 0x0F;  // Battery charge warning threshold
 static const uint8_t APC_REPORT_ID_CHARGE_LOW = 0x11;      // Battery charge low threshold
@@ -117,7 +120,8 @@ bool ApcCS500HidProtocol::detect() {
   
   // Try key report IDs based on NUT analysis - these are the critical ones
   const uint8_t test_report_ids[] = {
-    APC_REPORT_ID_POWER_SUMMARY,   // CRITICAL: PowerSummary.RemainingCapacity + RunTimeToEmpty (NUT primary data)
+    APC_REPORT_ID_REMAINING_CAPACITY, 
+    APC_REPORT_ID_RUNTIME_TO_EMPTY,   // CRITICAL: PowerSummary.RemainingCapacity + RunTimeToEmpty (NUT primary data)
     APC_REPORT_ID_PRESENT_STATUS,  // CRITICAL: PowerSummary.PresentStatus bitmap (status flags) 
     APC_REPORT_ID_BATTERY,         // PowerSummary.APCStatusFlag (basic status byte)
     APC_REPORT_ID_STATUS,          // Legacy status check
@@ -173,15 +177,23 @@ bool ApcCS500HidProtocol::read_data(UpsData &data) {
   // CRITICAL FIX: Read NUT-compatible reports in the correct order first
   // Device info will be read after successful HID communication
   
-  // 1. Read PowerSummary report (MOST IMPORTANT - battery % + runtime)
-  HidReport power_summary_report;
-  if (read_hid_report(APC_REPORT_ID_POWER_SUMMARY, power_summary_report)) {
-    parse_power_summary_report(power_summary_report, data);
+  // 1. Read PowerSummary.RemainingCapacity report
+  HidReport remaining_capacity_report;
+  if (read_hid_report(APC_REPORT_ID_REMAINING_CAPACITY, remaining_capacity_report)) {
+    parse_remaining_capacity_report(remaining_capacity_report, data);
     success = true;
   } else {
-    ESP_LOGV(APC_HID_TAG, "Failed to read PowerSummary report");
+    ESP_LOGV(APC_HID_TAG, "Failed to read PowerSummary.RemainingCapacity report");
   }
-  
+
+  HidReport runtime_to_empty_report;
+  if (read_hid_report(APC_REPORT_ID_RUNTIME_TO_EMPTY, runtime_to_empty_report)) {
+    parse_runtime_to_empty_report(runtime_to_empty_report, data);
+    success = true;
+  } else {
+    ESP_LOGV(APC_HID_TAG, "Failed to read PowerSummary.RuntimeToEmpty report");
+  }
+
   // 2. Read PresentStatus report (status bitmap - AC, charging, discharging, etc.)
   HidReport present_status_report;
   if (read_hid_report(APC_REPORT_ID_PRESENT_STATUS, present_status_report)) {
@@ -414,7 +426,8 @@ public:
   // Power and battery parsing
   static void parse_battery_report(const HidReport &report, UpsData &data);
   static void parse_power_report(const HidReport &report, UpsData &data);
-  static void parse_power_summary_report(const HidReport &report, UpsData &data);
+  static void parse_remaining_capacity_report(const HidReport &report, UpsData &data);
+  static void parse_runtime_to_empty_report(const HidReport &report, UpsData &data);
   static void parse_voltage_report(const HidReport &report, UpsData &data);
   static void parse_input_voltage_report(const HidReport &report, UpsData &data);
   static void parse_load_report(const HidReport &report, UpsData &data);
@@ -451,11 +464,11 @@ void ApcReportParser::parse_device_info_report(const HidReport &report) {
   ESP_LOGD(TAG, "Device info report received");
 }
 
-void ApcReportParser::parse_power_summary_report(const HidReport &report, UpsData &data) {
+void ApcReportParser::parse_remaining_capacity_report(const HidReport &report, UpsData &data) {
   // PowerSummary report: RemainingCapacity + RunTimeToEmpty
   // CORRECTED: ESP32 data [0C 64 B2 02] - byte 1 is battery %, bytes 2-3 are runtime
   if (report.data.size() < 2) {
-    ESP_LOGW(APC_HID_TAG, "PowerSummary report too short: %zu bytes", report.data.size());
+    ESP_LOGW(APC_HID_TAG, "PowerSummary.RemainingCapacity report too short: %zu bytes", report.data.size());
     return;
   }
   
@@ -465,14 +478,23 @@ void ApcReportParser::parse_power_summary_report(const HidReport &report, UpsDat
   ESP_LOGD(APC_HID_TAG, "Raw battery byte: 0x%02X = %d%%", report.data[1], report.data[1]);
   ESP_LOGI(APC_HID_TAG, "PowerSummary: Battery %.0f%%", data.battery.level);
   
-  // Runtime at bytes 2-3 (16-bit little-endian, NUT offset 8)
+}
+
+void ApcReportParser::parse_runtime_to_empty_report(const HidReport &report, UpsData &data) {
+  if (report.data.size() < 3) {
+    ESP_LOGW(APC_HID_TAG, "PowerSummary.RuntimeToEmpty report too short: %zu bytes", report.data.size());
+    return;
+  }
+  
+  // Runtime at bytes 1-2 (16-bit little-endian, NUT offset 8)
   // CORRECTED: Raw HID value is in seconds (like NUT), convert to minutes for ESPHome
-  if (report.data.size() >= 4) {
-    uint16_t runtime_raw = report.data[2] | (report.data[3] << 8);
+  if (report.data.size() >= 3) {
+    uint16_t runtime_raw = report.data[1] | (report.data[2] << 8);
     if (runtime_raw > 0 && runtime_raw < 65535) {
       // Convert seconds to minutes to match ESPHome sensor expectations  
       data.battery.runtime_minutes = static_cast<float>(runtime_raw) / 60.0f;
-      ESP_LOGI(APC_HID_TAG, "PowerSummary: Runtime %d seconds (%.1f minutes)", runtime_raw, data.battery.runtime_minutes);
+      ESP_LOGD(APC_HID_TAG, "Raw battery byte: 0x%02X 0x%02X", report.data[1], report.data[2]);
+      ESP_LOGI(APC_HID_TAG, "PowerSummary: Runtime To Empty %d seconds (%.1f minutes)", runtime_raw, data.battery.runtime_minutes);
     }
   }
 }
@@ -878,8 +900,12 @@ void ApcCS500HidProtocol::parse_device_info_report(const HidReport &report) {
 }
 
 // NUT-compatible parser implementations based on real device data analysis
-void ApcCS500HidProtocol::parse_power_summary_report(const HidReport &report, UpsData &data) {
-  ApcReportParser::parse_power_summary_report(report, data);
+void ApcCS500HidProtocol::parse_remaining_capacity_report(const HidReport &report, UpsData &data) {
+  ApcReportParser::parse_remaining_capacity_report(report, data);
+}
+
+void ApcCS500HidProtocol::parse_runtime_to_empty_report(const HidReport &report, UpsData &data) {
+  ApcReportParser::parse_runtime_to_empty_report(report, data);
 }
 
 void ApcCS500HidProtocol::parse_present_status_report(const HidReport &report, UpsData &data) {
