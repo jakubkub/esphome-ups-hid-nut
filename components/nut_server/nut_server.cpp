@@ -468,11 +468,12 @@ void NutServerComponent::handle_list_var(NutClient &client, const std::string &a
   // Standard NUT variables mapping to actual UPS data
   std::vector<std::string> variables = {
     "ups.mfr", "ups.model", "ups.status", "ups.serial", "ups.firmware",
-    "battery.charge", "battery.voltage", "battery.voltage.nominal", "battery.runtime",
-    "input.voltage", "input.voltage.nominal", "input.frequency", 
+    "battery.charge", "battery.voltage", "battery.voltage.nominal", "battery.runtime","battery.temperature","battery.runtime.low","battery.charge.warning",
+    "battery.type","battery.mfr.date","battery.date",
+    "input.voltage", "input.voltage.nominal", "input.frequency","output.frequency", 
     "input.transfer.low", "input.transfer.high",
     "output.voltage", "output.voltage.nominal", 
-    "ups.load", "ups.realpower.nominal", "ups.power.nominal"
+    "ups.load", "ups.realpower.nominal", "ups.power.nominal","ups.delay.shutdown","ups.delay.start","ups.test.result","ups.test.interval"
   };
   
   for (const auto &var : variables) {
