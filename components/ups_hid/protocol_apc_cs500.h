@@ -57,7 +57,9 @@ private:
   void parse_power_report(const HidReport &report, UpsData &data);
   
   // NUT-compatible parsers
-  void parse_power_summary_report(const HidReport &report, UpsData &data);
+  //void parse_power_summary_report(const HidReport &report, UpsData &data);
+  void parse_remaining_capacity_report(const HidReport &report, UpsData &data);
+  void parse_runtime_to_empty_report(const HidReport &report, UpsData &data);
   void parse_present_status_report(const HidReport &report, UpsData &data);
   void parse_apc_status_report(const HidReport &report, UpsData &data);
   void parse_input_voltage_report(const HidReport &report, UpsData &data);
