@@ -416,7 +416,7 @@ namespace {
 
 using HidReport = ApcCS500HidProtocol::HidReport;
 
-class ApcReportParser {
+class ApcCS500ReportParser {
 public:
   // Status and state parsing
   static void parse_status_report(const HidReport &report, UpsData &data);
@@ -459,12 +459,12 @@ public:
   static void parse_test_result_report(const HidReport &report, UpsData &data);
 };
 
-void ApcReportParser::parse_device_info_report(const HidReport &report) {
+void ApcCS500ReportParser::parse_device_info_report(const HidReport &report) {
   // Device info report parsing (implementation needed)
   ESP_LOGD(TAG, "Device info report received");
 }
 
-void ApcReportParser::parse_remaining_capacity_report(const HidReport &report, UpsData &data) {
+void ApcCS500ReportParser::parse_remaining_capacity_report(const HidReport &report, UpsData &data) {
   // PowerSummary report: RemainingCapacity + RunTimeToEmpty
   // CORRECTED: ESP32 data [0C 64 B2 02] - byte 1 is battery %, bytes 2-3 are runtime
   if (report.data.size() < 2) {
@@ -480,7 +480,7 @@ void ApcReportParser::parse_remaining_capacity_report(const HidReport &report, U
   
 }
 
-void ApcReportParser::parse_runtime_to_empty_report(const HidReport &report, UpsData &data) {
+void ApcCS500ReportParser::parse_runtime_to_empty_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 3) {
     ESP_LOGW(APC_HID_TAG, "PowerSummary.RuntimeToEmpty report too short: %zu bytes", report.data.size());
     return;
@@ -499,7 +499,7 @@ void ApcReportParser::parse_runtime_to_empty_report(const HidReport &report, Ups
   }
 }
 
-void ApcReportParser::parse_present_status_report(const HidReport &report, UpsData &data) {
+void ApcCS500ReportParser::parse_present_status_report(const HidReport &report, UpsData &data) {
   // PresentStatus report: PowerSummary.PresentStatus - HID field structure
   // Based on NUT logs showing exact offsets for each 1-bit field:
   // Offset 0: Charging, Offset 1: Discharging, Offset 2: ACPresent, Offset 3: BatteryPresent, etc.
@@ -576,7 +576,7 @@ void ApcReportParser::parse_present_status_report(const HidReport &report, UpsDa
            data.power.status.c_str(), data.battery.status.c_str());
 }
 
-void ApcReportParser::parse_apc_status_report(const HidReport &report, UpsData &data) {
+void ApcCS500ReportParser::parse_apc_status_report(const HidReport &report, UpsData &data) {
   // APCStatusFlag report: PowerSummary.APCStatusFlag (single byte legacy status)
   // ESP32 data format: [06 XX] where XX is the status value
   if (report.data.size() < 2) {
@@ -609,7 +609,7 @@ void ApcReportParser::parse_apc_status_report(const HidReport &report, UpsData &
   // PresentStatus report is more detailed and authoritative
 }
 
-void ApcReportParser::parse_input_voltage_report(const HidReport &report, UpsData &data) {
+void ApcCS500ReportParser::parse_input_voltage_report(const HidReport &report, UpsData &data) {
   // Input voltage report: UPS.Input.Voltage (16-bit value)
   // NUT logs show values like 236V, 232V (AC input voltage)
   if (report.data.size() < 3) {
@@ -624,7 +624,7 @@ void ApcReportParser::parse_input_voltage_report(const HidReport &report, UpsDat
   ESP_LOGI(APC_HID_TAG, "Input voltage: %.1fV", data.power.input_voltage);
 }
 
-void ApcReportParser::parse_load_report(const HidReport &report, UpsData &data) {
+void ApcCS500ReportParser::parse_load_report(const HidReport &report, UpsData &data) {
   // Load report: UPS.PowerConverter.PercentLoad (8-bit percentage)
   // NUT logs show values like 23%, 16% (load percentage)
   if (report.data.size() < 2) {
@@ -645,11 +645,11 @@ void ApcReportParser::parse_load_report(const HidReport &report, UpsData &data) 
 // ============================================================================
 
 void ApcCS500HidProtocol::parse_status_report(const HidReport &report, UpsData &data) {
-  ApcReportParser::parse_status_report(report, data);
+  ApcCS500ReportParser::parse_status_report(report, data);
 }
 
 // Battery report parsing implementation
-void ApcReportParser::parse_battery_report(const HidReport &report, UpsData &data) {
+void ApcCS500ReportParser::parse_battery_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 2) {
     ESP_LOGW(APC_HID_TAG, "Battery report too short: %zu bytes", report.data.size());
     return;
@@ -687,7 +687,7 @@ void ApcReportParser::parse_battery_report(const HidReport &report, UpsData &dat
 }
 
 // Status report parsing implementation
-void ApcReportParser::parse_status_report(const HidReport &report, UpsData &data) {
+void ApcCS500ReportParser::parse_status_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 2) {
     ESP_LOGW(APC_HID_TAG, "Status report too short: %zu bytes", report.data.size());
     return;
@@ -762,7 +762,7 @@ void ApcReportParser::parse_status_report(const HidReport &report, UpsData &data
 }
 
 // Voltage report parsing implementation
-void ApcReportParser::parse_voltage_report(const HidReport &report, UpsData &data) {
+void ApcCS500ReportParser::parse_voltage_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 2) {
     ESP_LOGW(APC_HID_TAG, "Voltage report too short: %zu bytes", report.data.size());
     return;
@@ -797,7 +797,7 @@ void ApcReportParser::parse_voltage_report(const HidReport &report, UpsData &dat
 }
 
 // Power report parsing implementation
-void ApcReportParser::parse_power_report(const HidReport &report, UpsData &data) {
+void ApcCS500ReportParser::parse_power_report(const HidReport &report, UpsData &data) {
   if (report.data.size() < 3) {
     ESP_LOGW(APC_HID_TAG, "Power report too short: %zu bytes", report.data.size());
     return;
@@ -836,11 +836,11 @@ void ApcReportParser::parse_power_report(const HidReport &report, UpsData &data)
 }
 
 void ApcCS500HidProtocol::parse_battery_report(const HidReport &report, UpsData &data) {
-  ApcReportParser::parse_battery_report(report, data);
+  ApcCS500ReportParser::parse_battery_report(report, data);
 }
 
 void ApcCS500HidProtocol::parse_voltage_report(const HidReport &report, UpsData &data) {
-  ApcReportParser::parse_voltage_report(report, data);
+  ApcCS500ReportParser::parse_voltage_report(report, data);
 }
 
 void ApcCS500HidProtocol::parse_power_report(const HidReport &report, UpsData &data) {
@@ -896,32 +896,32 @@ void ApcCS500HidProtocol::read_device_info() {
 }
 
 void ApcCS500HidProtocol::parse_device_info_report(const HidReport &report) {
-  ApcReportParser::parse_device_info_report(report);
+  ApcCS500ReportParser::parse_device_info_report(report);
 }
 
 // NUT-compatible parser implementations based on real device data analysis
 void ApcCS500HidProtocol::parse_remaining_capacity_report(const HidReport &report, UpsData &data) {
-  ApcReportParser::parse_remaining_capacity_report(report, data);
+  ApcCS500ReportParser::parse_remaining_capacity_report(report, data);
 }
 
 void ApcCS500HidProtocol::parse_runtime_to_empty_report(const HidReport &report, UpsData &data) {
-  ApcReportParser::parse_runtime_to_empty_report(report, data);
+  ApcCS500ReportParser::parse_runtime_to_empty_report(report, data);
 }
 
 void ApcCS500HidProtocol::parse_present_status_report(const HidReport &report, UpsData &data) {
-  ApcReportParser::parse_present_status_report(report, data);
+  ApcCS500ReportParser::parse_present_status_report(report, data);
 }
 
 void ApcCS500HidProtocol::parse_apc_status_report(const HidReport &report, UpsData &data) {
-  ApcReportParser::parse_apc_status_report(report, data);
+  ApcCS500ReportParser::parse_apc_status_report(report, data);
 }
 
 void ApcCS500HidProtocol::parse_input_voltage_report(const HidReport &report, UpsData &data) {
-  ApcReportParser::parse_input_voltage_report(report, data);
+  ApcCS500ReportParser::parse_input_voltage_report(report, data);
 }
 
 void ApcCS500HidProtocol::parse_load_report(const HidReport &report, UpsData &data) {
-  ApcReportParser::parse_load_report(report, data);
+  ApcCS500ReportParser::parse_load_report(report, data);
 }
 
 void ApcCS500HidProtocol::read_device_information(UpsData &data) {
@@ -1624,7 +1624,7 @@ bool ApcCS500HidProtocol::beeper_enable() {
   // APC DEVICE SPECIFIC: From NUT debug, your device supports TWO beeper report IDs:
   // APC_REPORT_ID_AUDIBLE_ALARM: UPS.PowerSummary.AudibleAlarmControl
   // APC_REPORT_ID_AUDIBLE_BEEPER: UPS.AudibleAlarmControl  
-  uint8_t report_ids_to_try[] = {APC_REPORT_ID_AUDIBLE_ALARM, APC_REPORT_ID_AUDIBLE_BEEPER, APC_REPORT_ID_BEEPER, APC_REPORT_ID_POWER_SUMMARY};
+  uint8_t report_ids_to_try[] = {APC_REPORT_ID_AUDIBLE_ALARM, APC_REPORT_ID_AUDIBLE_BEEPER, APC_REPORT_ID_BEEPER}; //, APC_REPORT_ID_POWER_SUMMARY};
   
   for (size_t i = 0; i < sizeof(report_ids_to_try); i++) {
     uint8_t report_id = report_ids_to_try[i];
@@ -1661,7 +1661,7 @@ bool ApcCS500HidProtocol::beeper_disable() {
   // APC DEVICE SPECIFIC: From NUT debug, your device supports TWO beeper report IDs:
   // APC_REPORT_ID_AUDIBLE_ALARM: UPS.PowerSummary.AudibleAlarmControl
   // APC_REPORT_ID_AUDIBLE_BEEPER: UPS.AudibleAlarmControl  
-  uint8_t report_ids_to_try[] = {APC_REPORT_ID_AUDIBLE_ALARM, APC_REPORT_ID_AUDIBLE_BEEPER, APC_REPORT_ID_BEEPER, APC_REPORT_ID_POWER_SUMMARY};
+  uint8_t report_ids_to_try[] = {APC_REPORT_ID_AUDIBLE_ALARM, APC_REPORT_ID_AUDIBLE_BEEPER, APC_REPORT_ID_BEEPER}; //, APC_REPORT_ID_POWER_SUMMARY};
   
   for (size_t i = 0; i < sizeof(report_ids_to_try); i++) {
     uint8_t report_id = report_ids_to_try[i];
