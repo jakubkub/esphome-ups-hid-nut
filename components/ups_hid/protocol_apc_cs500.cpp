@@ -131,14 +131,12 @@ static const uint8_t APC_REPORT_ID_PANEL_TEST = 0x32;      // Panel/UPS test con
   static const uint8_t APC_REPORT_ID_CHARGE_WARNING = 0x0F;  // Battery charge warning threshold
   static const uint8_t APC_REPORT_ID_CHARGE_LOW = 0x11;      // Battery charge low threshold
 // Status bit masks
-  static const uint8_t APC_STATUS_AC_PRESENT = 0x01;        // Bit 0: AC present
-  static const uint8_t APC_STATUS_CHARGING = 0x04;          // Bit 2: Charging
-  static const uint8_t APC_STATUS_DISCHARGING = 0x10;       // Bit 4: Discharging  
+  static const uint8_t APC_STATUS_AC_PRESENT = 0x04;        // Bit 2: AC present
+  static const uint8_t APC_STATUS_CHARGING = 0x01;          // Bit 0: Charging
+  static const uint8_t APC_STATUS_DISCHARGING = 0x02;       // Bit 1: Discharging  
   static const uint8_t APC_STATUS_GOOD = 0x20;              // Bit 5: Battery good
   static const uint8_t APC_STATUS_INTERNAL_FAILURE = 0x40;  // Bit 6: Internal failure
   static const uint8_t APC_STATUS_NEED_REPLACEMENT = 0x80;  // Bit 7: Need replacement
-
-
 
 // APC-specific date conversion (hex-as-decimal format)
 static std::string convert_apc_date(uint32_t apc_date) {
@@ -666,9 +664,9 @@ void ApcCS500ReportParser::parse_apc_status_report(const HidReport &report, UpsD
 }
 
 void ApcCS500ReportParser::parse_input_voltage_report(const HidReport &report, UpsData &data) {
-  // Input voltage report: UPS.Input.Voltage (16-bit value)
+  // Input voltage report: UPS.Input.Voltage (32-bit value)
   // NUT logs show values like 236V, 232V (AC input voltage)
-  if (report.data.size() < 3) {
+  if (report.data.size() < 3)  {
     ESP_LOGW(APC_HID_TAG, "Input voltage report too short: %zu bytes", report.data.size());
     return;
   }
@@ -689,9 +687,8 @@ void ApcCS500ReportParser::parse_load_report(const HidReport &report, UpsData &d
   }
   
   // Parse 8-bit load percentage
-  data.power.load_percent = static_cast<float>(report.data[1]);
-  
-  ESP_LOGI(APC_HID_TAG, "Load percentage: %.0f%%", data.power.load_percent);
+  data.power.load_percent = static_cast<float>(report.data[1]) / 10.0f;
+  ESP_LOGI(APC_HID_TAG, "Load percentage: %.1f%%", data.power.load_percent);
 }
 
 } // anonymous namespace
