@@ -673,7 +673,7 @@ void ApcCS500ReportParser::parse_input_voltage_report(const HidReport &report, U
   
   // Parse 16-bit voltage value (little-endian)
   uint16_t voltage_raw = report.data[1] | (report.data[2] << 8);
-  data.power.input_voltage = static_cast<float>(voltage_raw);
+  data.power.input_voltage = static_cast<float>(voltage_raw) / 10.0f;;
   
   ESP_LOGI(APC_HID_TAG, "Input voltage: %.1fV", data.power.input_voltage);
 }
