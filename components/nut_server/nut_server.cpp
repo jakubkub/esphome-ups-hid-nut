@@ -785,6 +785,9 @@ std::string NutServerComponent::get_ups_var(const std::string &var_name) {
       float runtime_minutes = ups_hid_->get_runtime_minutes();
       if (runtime_minutes > 0) return std::to_string(static_cast<int>(runtime_minutes * 60));
     }
+    if (var_name == "battery.type" && !std::isnan(ups_data.battery.type)) {
+      return ups_data.battery.type;
+    }
     
     // Input power variables
     if (var_name == "input.voltage") {

@@ -112,8 +112,7 @@ namespace battery_chemistry {
     static constexpr const char* UNKNOWN = battery_status::UNKNOWN;
     
     // Common HID report ID for battery chemistry (used by both APC and CyberPower)
-    static constexpr uint8_t REPORT_ID = 0x05;
-    //static constexpr uint8_t REPORT_ID = 0x03;
+    static constexpr uint8_t REPORT_ID = 0x03;
     
     // Chemistry ID constants (HID standard values)
     static constexpr uint8_t ID_ALKALINE = 1;

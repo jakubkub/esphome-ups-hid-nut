@@ -22,7 +22,7 @@ static const char *const APC_HID_TAG = "ups_hid.apc_cs500_hid";
   // 0x04 UPS.PowerSummary.iOEMInformation
   static const uint8_t APC_REPORT_ID_DEVICE_INFO = 0x03;    // Device information
   static const uint8_t APC_REPORT_ID_FIRMWARE = 0x04;       // Firmware version
-  // 0x05 UPS.PowerSummary.iDeviceChemistry - Note: Battery chemistry report ID moved to shared constant battery_chemistry::REPORT_ID
+  static const uint8_t APC_REPORT_ID_DEVICE_CHEMISTRY = 0x05; // UPS.PowerSummary.iDeviceChemistry 
   // 0x06 UPS.PowerSummary.Rechargeable, Offset: 0, Size: 8, Value: 1
   // 0x06 UPS.PowerSummary.CapacityMode, Offset: 8, Size: 8, Value: 2
 
@@ -1390,7 +1390,7 @@ void ApcCS500HidProtocol::read_missing_dynamic_values(UpsData &data) {
   
   // 8. Battery chemistry/type (shared report ID)
   HidReport battery_chemistry_report;
-  if (read_hid_report(battery_chemistry::REPORT_ID, battery_chemistry_report)) {
+  if (read_hid_report(APC_REPORT_ID_DEVICE_CHEMISTRY, battery_chemistry_report)) {
     parse_battery_chemistry_report(battery_chemistry_report, data);
   }
   
