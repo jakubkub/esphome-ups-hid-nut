@@ -20,7 +20,7 @@ static const char *const APC_HID_TAG = "ups_hid.apc_cs500_hid";
   // 0x02 UPS.PowerSummary.iSerialNumber -  Note: Serial number report ID moved to shared constant usb::REPORT_ID_SERIAL_NUMBER
   // 0x03 UPS.PowerSummary.iManufacturer
   // 0x04 UPS.PowerSummary.iOEMInformation
-  static const uint8_t APC_REPORT_ID_DEVICE_INFO = 0x03;     // Device information
+  static const uint8_t APC_REPORT_ID_DEVICE_INFO = 0x03;    // Device information
   static const uint8_t APC_REPORT_ID_FIRMWARE = 0x04;       // Firmware version
   // 0x05 UPS.PowerSummary.iDeviceChemistry - Note: Battery chemistry report ID moved to shared constant battery_chemistry::REPORT_ID
   // 0x06 UPS.PowerSummary.Rechargeable, Offset: 0, Size: 8, Value: 1
