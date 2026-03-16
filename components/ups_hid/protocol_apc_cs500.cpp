@@ -16,17 +16,18 @@ namespace ups_hid {
 
 static const char *const APC_HID_TAG = "ups_hid.apc_cs500_hid";
 
-  // 0x01 UPS.PowerSummary.iProduct 
-  // 0x02 UPS.PowerSummary.iSerialNumber -  Note: Serial number report ID moved to shared constant usb::REPORT_ID_SERIAL_NUMBER
-  // 0x03 UPS.PowerSummary.iManufacturer
-  // 0x04 UPS.PowerSummary.iOEMInformation
-  static const uint8_t APC_REPORT_ID_DEVICE_INFO = 0x03;    // Device information
+  // 0x01 UPS.PowerSummary.iProduct (2 bytes)
+  // 0x02 UPS.PowerSummary.iSerialNumber -  Note: Serial number report ID moved to shared constant usb::REPORT_ID_SERIAL_NUMBER (2 bytes) ups.serial: 8B0639R04325 
+  // 0x03 UPS.PowerSummary.iManufacturer (2 bytes)
+  // 0x04 UPS.PowerSummary.iOEMInformation (2 bytes)
+  static const uint8_t APC_REPORT_ID_DEVICE_INFO = 0x03;    // Device information 2bytes
   static const uint8_t APC_REPORT_ID_FIRMWARE = 0x04;       // Firmware version
-  static const uint8_t APC_REPORT_ID_DEVICE_CHEMISTRY = 0x05; // UPS.PowerSummary.iDeviceChemistry 
-  // 0x06 UPS.PowerSummary.Rechargeable, Offset: 0, Size: 8, Value: 1
+  
+  static const uint8_t APC_REPORT_ID_DEVICE_CHEMISTRY = 0x05; // UPS.PowerSummary.iDeviceChemistry (2 bytes) - battery.type: PbAc - Składniki baterii PbAc
+  // 0x06 UPS.PowerSummary.Rechargeable, Offset: 0, Size: 8, Value: 1 (3 bytes)
   // 0x06 UPS.PowerSummary.CapacityMode, Offset: 8, Size: 8, Value: 2
 
-static const uint8_t APC_REPORT_ID_PRESENT_STATUS = 0x07;  // PowerSummary.PresentStatus bitmap 
+static const uint8_t APC_REPORT_ID_PRESENT_STATUS = 0x07;  // PowerSummary.PresentStatus bitmap (3 bytes)
 // Present status bit masks  
 static const uint8_t APC_PRESENT_CHARGING = 0x01;         // Bit 0: Charging
 static const uint8_t APC_PRESENT_DISCHARGING = 0x02;      // Bit 1: Discharging
@@ -42,53 +43,53 @@ static const uint8_t APC_PRESENT_OVERLOAD = 0x04;          // Bit 2(10) of secon
 static const uint8_t APC_PRESENT_VOLTAGE_NOT_REGULATED = 0x08;          // Bit 3(11) of second byte: VoltageNotRegulated
 static const uint8_t APC_PRESENT_FF860080 = 0x10; // Bit 4(12) of second byte: ff860080
 
-static const uint8_t APC_REPORT_ID_REMAINING_TIME_LIMIT = 0x08; //UPS.PowerSummary.RemainingTimeLimit
-static const uint8_t APC_REPORT_ID_MFR_DATE_UPS = 0x09;    // UPS manufacture date
-  // 0x0a UPS.PowerSummary.ConfigVoltage
-static const uint8_t APC_REPORT_ID_OUTPUT_VOLTAGE = 0x0b;  // PowerSummary.Voltage (legacy) 
-static const uint8_t APC_REPORT_ID_REMAINING_CAPACITY = 0x0C;   // PowerSummary.RemainingCapacity (1 bytes)
-static const uint8_t APC_REPORT_ID_RUNTIME_TO_EMPTY = 0x0D;   // PowerSummary.RunTimeToEmpty (2 bytes)
-  // 0x0e UPS.PowerSummary.DesignCapacity
-  // 0x0f UPS.PowerSummary.WarningCapacityLimit
-  // 0x10 UPS.PowerSummary.CapacityGranularity1 (1 byte)
-  // 0x10 UPS.PowerSummary.CapacityGranularity2 (offset 8 , 1 byte)
-  // 0x11 UPS.PowerSummary.RemainingCapacityLimit (1 byte)
-static const uint8_t APC_REPORT_ID_DELAY_SHUTDOWN = 0x12;  // Delay before shutdown
-static const uint8_t APC_REPORT_ID_DELAY_REBOOT = 0x13;    // Delay before reboot
-static const uint8_t APC_REPORT_ID_AUDIBLE_ALARM = 0x14;  // Audible alarm control (beeper)
-static const uint8_t APC_REPORT_ID_MFR_DATE_BATTERY = 0x15; // Battery manufacture date  
-static const uint8_t APC_REPORT_ID_BATTERY_TEST = 0x16;    // Battery test control (same as test result)
-  // 0x17 UPS.Battery.APCBattCapBeforeStartup (1 byte)
-  // 0x18 UPS.Battery.RemainingCapacity
-  // 0x19 UPS.Battery.RunTimeToEmpty
-  // 0x1a UPS.Battery.RemainingTimeLimit
-  // 0x1b UPS.Battery.ff86001a
+static const uint8_t APC_REPORT_ID_REMAINING_TIME_LIMIT = 0x08; //UPS.PowerSummary.RemainingTimeLimit (3 bytes)
+static const uint8_t APC_REPORT_ID_MFR_DATE_UPS = 0x09;    // UPS manufacture date (3 bytes)
+  // 0x0a UPS.PowerSummary.ConfigVoltage (3 bytes)
+static const uint8_t APC_REPORT_ID_OUTPUT_VOLTAGE = 0x0b;  // PowerSummary.Voltage (legacy) 13.43 (3 bytes)
+static const uint8_t APC_REPORT_ID_REMAINING_CAPACITY = 0x0C;   // PowerSummary.RemainingCapacity (2 bytes)
+static const uint8_t APC_REPORT_ID_RUNTIME_TO_EMPTY = 0x0D;   // PowerSummary.RunTimeToEmpty (3 bytes)
+  // 0x0e UPS.PowerSummary.DesignCapacity (3 bytes)
+  // 0x0f UPS.PowerSummary.WarningCapacityLimit 50 (2 bytes)
+  // 0x10 UPS.PowerSummary.CapacityGranularity1 (3 bytes)
+  // 0x10 UPS.PowerSummary.CapacityGranularity2 (offset 8)
+  // 0x11 UPS.PowerSummary.RemainingCapacityLimit (2 bytes)
+static const uint8_t APC_REPORT_ID_DELAY_SHUTDOWN = 0x12;  // Delay before shutdown (3 bytes)
+static const uint8_t APC_REPORT_ID_DELAY_REBOOT = 0x13;    // Delay before reboot (4 bytes)
+static const uint8_t APC_REPORT_ID_AUDIBLE_ALARM = 0x14;  // Audible alarm control (beeper) (2 bytes)
+static const uint8_t APC_REPORT_ID_MFR_DATE_BATTERY = 0x15; // Battery manufacture date  (3 bytes)
+static const uint8_t APC_REPORT_ID_BATTERY_TEST = 0x16;    // Battery test control (same as test result) (2 bytes)
+  // 0x17 UPS.Battery.APCBattCapBeforeStartup (2 bytes)
+  // 0x18 UPS.Battery.RemainingCapacity (3 bytes)
+  // 0x19 UPS.Battery.RunTimeToEmpty (3 bytes)
+  // 0x1a UPS.Battery.RemainingTimeLimit (3 bytes)
+  // 0x1b UPS.Battery.ff86001a 
   // 0x1c UPS.Battery.ff86001b
-static const uint8_t APC_REPORT_ID_BATTERY_VOLTAGE = 0x1d;  // Battery voltage actual
-  // 0x1e UPS.Battery.Temperature
-static const uint8_t APC_REPORT_ID_BATTERY_VOLTAGE_NOMINAL = 0x1f; // Battery voltage nominal - UPS.Battery.ConfigVoltage
-static const uint8_t APC_REPORT_ID_INPUT_VOLTAGE = 0x20;   // UPS.Input.Voltage (2-4 bytes)
-  // 0x21 UPS.Input.APCLineFailCause
-static const uint8_t APC_REPORT_ID_SENSITIVITY = 0x22;    // UPS.Input.APCSensitivity
-  // 0x23 UPS.Output.HighVoltageTransfer
-  // 0x24 UPS.Output.LowVoltageTransfer
+static const uint8_t APC_REPORT_ID_BATTERY_VOLTAGE = 0x1d;  // Battery voltage actual (3 bytes)
+//stati 0x1e UPS.Battery.Temperature (3 bytes)
+static const uint8_t APC_REPORT_ID_BATTERY_VOLTAGE_NOMINAL = 0x1f; // Battery voltage nominal - UPS.Battery.ConfigVoltage (3 bytes)
+static const uint8_t APC_REPORT_ID_INPUT_VOLTAGE = 0x20;   // UPS.Input.Voltage (5 bytes)
+  // 0x21 UPS.Input.APCLineFailCause (2 bytes)
+static const uint8_t APC_REPORT_ID_SENSITIVITY = 0x22;    // UPS.Input.APCSensitivity (2 bytes)
+  // 0x23 UPS.Output.HighVoltageTransfer (3 bytes)
+  // 0x24 UPS.Output.LowVoltageTransfer (3 bytes)
 static const uint8_t APC_REPORT_ID_INPUT_TRANSFER_LOW = 0x24;  // Input low voltage transfer point
 static const uint8_t APC_REPORT_ID_INPUT_TRANSFER_HIGH = 0x23; // Input high voltage transfer point
-  // 0x25 UPS.Output.APCDelayBeforeStartup
-  // 0x26 UPS.Output.APCShutdownAfterDelay
-  // 0x27 UPS.Output.DelayBeforeShutdown
-  // 0x28 UPS.Output.DelayBeforeStartup
-  // 0x29 UPS.Output.DelayBeforeReboot
-static const uint8_t APC_REPORT_ID_FREQUENCY = 0x2A;       // UPS.Output.Frequency (2 bytes)
-static const uint8_t APC_REPORT_ID_VOLTAGE = 0x2b;   // Output voltage
-static const uint8_t APC_REPORT_ID_LOAD_PERCENT = 0x2c;    // UPS.Output.PercentLoad (2 bytes)
-  // 0x2d UPS.Output.ConfigVoltage
-  // 0x2e UPS.iProduct
-  // 0x2f UPS.iSerialNumber
-  // 0x30 UPS.iManufacturer
-  // 0x31 UPS.iName
-static const uint8_t APC_REPORT_ID_PANEL_TEST = 0x32;      // Panel/UPS test control
-  // 0x33 UPS.PresentStatus
+  // 0x25 UPS.Output.APCDelayBeforeStartup (3 bytes)
+  // 0x26 UPS.Output.APCShutdownAfterDelay (3 bytes)
+  // 0x27 UPS.Output.DelayBeforeShutdown (3 bytes)
+  // 0x28 UPS.Output.DelayBeforeStartup (3 bytes)
+  // 0x29 UPS.Output.DelayBeforeReboot (4 bytes)
+static const uint8_t APC_REPORT_ID_FREQUENCY = 0x2A;       // UPS.Output.Frequency (3 bytes)
+static const uint8_t APC_REPORT_ID_OUTPUT_VOLTAGE = 0x2b;   // Output voltage (3 bytes)
+static const uint8_t APC_REPORT_ID_LOAD_PERCENT = 0x2c;    // UPS.Output.PercentLoad (3 bytes)
+  // 0x2d UPS.Output.ConfigVoltage (3 bytes)
+  // 0x2e UPS.iProduct (2 bytes)
+  // 0x2f UPS.iSerialNumber (2 bytes)
+  // 0x30 UPS.iManufacturer (2 bytes)
+  // 0x31 UPS.iName (2 bytes)
+static const uint8_t APC_REPORT_ID_PANEL_TEST = 0x32;      // Panel/UPS test control (2 bytes)
+  // 0x33 UPS.PresentStatus (3 bytes)
   // 0x33 UPS.PresentStatus.Charging - bit 0
   // 0x33 UPS.PresentStatus.Discharging - bit 1
   // 0x33 UPS.PresentStatus.ACPresent - bit 2
@@ -101,25 +102,16 @@ static const uint8_t APC_REPORT_ID_PANEL_TEST = 0x32;      // Panel/UPS test con
   // 0x33 UPS.PresentStatus.NeedReplacement - bit 9  
   // 0x33 UPS.PresentStatus.Overload - bit 10
   // 0x33 UPS.PresentStatus.VoltageNotRegulated - bit 11
-  // 0x33 UPS.PresentStatus.ff860080 - bit 12
-  // 0x34 UPS.APC_UPS_FirmwareRevision
-  // 0x35 UPS.ManufacturerDate
-  // 0x36 UPS.AudibleAlarmControl
-  // 0x37 UPS.APC_USB_FirmwareRevision
-  // 0x3e UPS.ff860027
-  // 0x3f UPS.ff860028
-  // 0x40 UPS.Output.APCDelayBeforeReboot
-  // 0x41 UPS.Output.APCDelayBeforeShutdown
-  // 0x42 UPS.Input.ff860024
-  // 0x45 UPS.Battery.APCBattReplaceDate
-  // 0x46 UPS.Input.ConfigVoltage
-  // 0x47 UPS.Battery.ff860024
-  // 0x48 UPS.Battery.ff860018
+  // 0x34 UPS.APC_UPS_FirmwareRevision (2 bytes) 7
+  // 0x35 UPS.ManufacturerDate (3 bytes)
+  // 0x36 UPS.AudibleAlarmControl (2 bytes)
+  // 0x37 UPS.APC_USB_FirmwareRevision (2 bytes) 8
+  // 0x40 UPS.Output.APCDelayBeforeReboot (2 bytes)
+  // 0x41 UPS.Output.APCDelayBeforeShutdown (3 bytes)
+  // 0x45 UPS.Battery.APCBattReplaceDate (4 bytes)
+  // 0x46 UPS.Input.ConfigVoltage (2 bytes)
   // 0x51 UPS.PowerConverter.ff860024
-  // 0x52 UPS.Output.ConfigActivePower
-  // 0x60 UPS.ff860001.ff860023
-  // 0x61 UPS.ff860001.ff860026
-  // 0x62 UPS.ff860001.ff860025
+  // 0x52 UPS.Output.ConfigActivePower (3 bytes)
   static const uint8_t APC_REPORT_ID_STATUS = 0x07;    // UPS status flags
   static const uint8_t APC_REPORT_ID_BATTERY = 0x06;   // Battery level and runtime  
   static const uint8_t APC_REPORT_ID_LOAD = 0x07;      // UPS load information

@@ -467,13 +467,16 @@ void NutServerComponent::handle_list_var(NutClient &client, const std::string &a
   
   // Standard NUT variables mapping to actual UPS data
   std::vector<std::string> variables = {
-    "ups.mfr", "ups.model", "ups.status", "ups.serial", "ups.firmware",
-    "battery.charge", "battery.voltage", "battery.voltage.nominal", "battery.runtime","battery.temperature","battery.runtime.low","battery.charge.warning",
-    "battery.type","battery.mfr.date","battery.date",
-    "input.voltage", "input.voltage.nominal", "input.frequency","output.frequency", 
-    "input.transfer.low", "input.transfer.high",
-    "output.voltage", "output.voltage.nominal", 
-    "ups.load", "ups.realpower.nominal", "ups.power.nominal","ups.delay.shutdown","ups.delay.start","ups.test.result","ups.test.interval"
+    "ups.beeper.status","ups.delay.shutdown","ups.delay.start","ups.firmware","ups.firmware.aux","ups.load","ups.mfr","ups.mfr.date","ups.model","ups.productid",
+    "ups.realpower.nominal","ups.serial","ups.status","ups.test.result","ups.timer.reboot","ups.timer.shutdown","ups.timer.start","ups.vendorid",
+    
+    "battery.charge","battery.charge.low","battery.charge.warning","battery.date","battery.mfr.date","battery.runtime","battery.runtime.low",
+    "battery.temperature","battery.type","battery.voltage", "battery.voltage.nominal",
+    "input.sensitivity","input.transfer.high","input.transfer.low","input.transfer.reason","input.voltage","input.voltage.nominal",
+    "output.frequency","output.voltage","output.voltage.nominal", 
+    
+    "ups.power.nominal","ups.test.interval"
+    
   };
   
   for (const auto &var : variables) {
@@ -797,9 +800,9 @@ std::string NutServerComponent::get_ups_var(const std::string &var_name) {
     if (var_name == "input.voltage.nominal" && !std::isnan(ups_data.power.input_voltage_nominal)) {
       return format_nut_value(std::to_string(ups_data.power.input_voltage_nominal));
     }
-    if (var_name == "input.frequency" && !std::isnan(ups_data.power.frequency)) {
-      return format_nut_value(std::to_string(ups_data.power.frequency));
-    }
+    //if (var_name == "input.frequency" && !std::isnan(ups_data.power.frequency)) {
+    //  return format_nut_value(std::to_string(ups_data.power.frequency));
+    //}
     if (var_name == "input.transfer.low" && !std::isnan(ups_data.power.input_transfer_low)) {
       return format_nut_value(std::to_string(ups_data.power.input_transfer_low));
     }
@@ -815,7 +818,11 @@ std::string NutServerComponent::get_ups_var(const std::string &var_name) {
     if (var_name == "output.voltage.nominal" && !std::isnan(ups_data.power.output_voltage_nominal)) {
       return format_nut_value(std::to_string(ups_data.power.output_voltage_nominal));
     }
+    if (var_name == "output.frequency" && !std::isnan(ups_data.power.frequency)) {
+      return format_nut_value(std::to_string(ups_data.power.frequency));
+    }
     
+
     // Load and power variables
     if (var_name == "ups.load") {
       float load_percent = ups_hid_->get_load_percent();
