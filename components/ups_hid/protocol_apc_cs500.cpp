@@ -16,7 +16,7 @@ namespace ups_hid {
 
 static const char *const APC_HID_TAG = "ups_hid.apc_cs500_hid";
 
-  // 0x01 UPS.PowerSummary.iProduct
+  // 0x01 UPS.PowerSummary.iProduct 
   // 0x02 UPS.PowerSummary.iSerialNumber -  Note: Serial number report ID moved to shared constant usb::REPORT_ID_SERIAL_NUMBER
   // 0x03 UPS.PowerSummary.iManufacturer
   // 0x04 UPS.PowerSummary.iOEMInformation

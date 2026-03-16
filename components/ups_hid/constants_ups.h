@@ -105,13 +105,15 @@ namespace battery_chemistry {
     static constexpr const char* ALKALINE = "Alkaline";          // Chemistry code 1
     static constexpr const char* NICD = "NiCd";                  // Chemistry code 2
     static constexpr const char* NIMH = "NiMH";                  // Chemistry code 3
-    static constexpr const char* LEAD_ACID = "PbAcid";           // Chemistry code 4 (NUT standard)
+ // static constexpr const char* LEAD_ACID = "PbAcid";           // Chemistry code 4 (NUT standard)
+    static constexpr const char* LEAD_ACID = "PbAc";           // Chemistry code 4 (NUT standard)   
     static constexpr const char* LITHIUM_ION = "LiIon";         // Chemistry code 5
     static constexpr const char* LITHIUM_POLYMER = "LiPoly";    // Chemistry code 6
     static constexpr const char* UNKNOWN = battery_status::UNKNOWN;
     
     // Common HID report ID for battery chemistry (used by both APC and CyberPower)
-    static constexpr uint8_t REPORT_ID = 0x03;
+    static constexpr uint8_t REPORT_ID = 0x05;
+    //static constexpr uint8_t REPORT_ID = 0x03;
     
     // Chemistry ID constants (HID standard values)
     static constexpr uint8_t ID_ALKALINE = 1;
