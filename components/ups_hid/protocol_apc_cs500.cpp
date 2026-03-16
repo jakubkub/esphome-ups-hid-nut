@@ -81,7 +81,7 @@ static const uint8_t APC_REPORT_ID_INPUT_TRANSFER_HIGH = 0x23; // Input high vol
   // 0x28 UPS.Output.DelayBeforeStartup (3 bytes)
   // 0x29 UPS.Output.DelayBeforeReboot (4 bytes)
 static const uint8_t APC_REPORT_ID_FREQUENCY = 0x2A;       // UPS.Output.Frequency (3 bytes)
-static const uint8_t APC_REPORT_ID_OUTPUT_VOLTAGE = 0x2b;   // Output voltage (3 bytes)
+//static const uint8_t APC_REPORT_ID_OUTPUT_VOLTAGE = 0x2b;   // Output voltage (3 bytes)
 static const uint8_t APC_REPORT_ID_LOAD_PERCENT = 0x2c;    // UPS.Output.PercentLoad (3 bytes)
   // 0x2d UPS.Output.ConfigVoltage (3 bytes)
   // 0x2e UPS.iProduct (2 bytes)
